@@ -1,0 +1,10 @@
+{
+    "service": {
+        "name": "webcache",
+        "tags": [
+            "webcache",
+            "version-1"
+        ], 
+        "port": 80
+    }
+}
