@@ -1,40 +1,23 @@
 FROM carrickpark/containerbase
 
-RUN \
-  useradd -r -s /bin/false varnishd
+RUN groupadd -r varnishd && useradd -r -g varnishd varnishd
 
-# Install Varnish source build dependencies.
-RUN \
-  apt-get update && apt-get install -y --no-install-recommends \
-    automake \
-    build-essential \
-    ca-certificates \
-    curl \
-    libedit-dev \
-    libjemalloc-dev \
-    libncurses-dev \
-    libpcre3-dev \
-    libtool \
-    pkg-config \
-    python-docutils \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		apt-transport-https \
+        ca-certificates \
+        curl \
+	&& rm -rf /var/lib/apt/lists/*
 
-# Install Varnish from source, so that Varnish modules can be compiled and installed.
-ENV VARNISH_VERSION=4.1.0
-ENV VARNISH_SHA256SUM=4a6ea08e30b62fbf25f884a65f0d8af42e9cc9d25bf70f45ae4417c4f1c99017
-RUN \
-  apt-get update && \
-  mkdir -p /usr/local/src && \
-  cd /usr/local/src && \
-  curl -sfLO https://repo.varnish-cache.org/source/varnish-$VARNISH_VERSION.tar.gz && \
-  echo "${VARNISH_SHA256SUM} varnish-$VARNISH_VERSION.tar.gz" | sha256sum -c - && \
-  tar -xzf varnish-$VARNISH_VERSION.tar.gz && \
-  cd varnish-$VARNISH_VERSION && \
-  ./autogen.sh && \
-  ./configure && \
-  make install && \
-  rm ../varnish-$VARNISH_VERSION.tar.gz
+ENV VARNISH_VERSION 4.1
+
+RUN curl https://repo.varnish-cache.org/GPG-key.txt | apt-key add -
+RUN echo "deb https://repo.varnish-cache.org/debian/ jessie varnish-$VARNISH_VERSION" >> /etc/apt/sources.list.d/varnish-cache.list
+
+# Update the package repository and install applications
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        varnish \
+    && rm -rf /var/lib/apt/lists/*
 
 ADD ./bin/start-varnishd.sh /usr/local/bin/start-varnishd
 ADD ./config/webcache.json /config/webcache.json
