@@ -9,14 +9,14 @@ RUN apt-get update \
         curl \
 	&& rm -rf /var/lib/apt/lists/*
 
-ENV VARNISH_VERSION 4.1
+ENV VARNISH_VERSION 3.0
 
 RUN curl https://repo.varnish-cache.org/GPG-key.txt | apt-key add -
 RUN echo "deb https://repo.varnish-cache.org/debian/ jessie varnish-$VARNISH_VERSION" >> /etc/apt/sources.list.d/varnish-cache.list
 
 # Update the package repository and install applications
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        varnish \
+        varnish=3.0.7-1~jessie \
     && rm -rf /var/lib/apt/lists/*
 
 ADD ./bin/start-varnishd.sh /usr/local/bin/start-varnishd
