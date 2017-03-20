@@ -2,10 +2,8 @@ vcl 4.0;
 
 import directors;
 
-{{ define "service_name_template" }}my custom template{{ end }}app__{{.Address | replaceAll "." "_"}}__{{.Port}}{{ end }}
-
 {{ range service "app|passing" }}
-backend {{ executeTemplate "service_name_template" }} {
+backend app__{{.Address | replaceAll "." "_"}}__{{.Port}} {
     .host = "{{.Address}}";
     .port = "{{.Port}}";
     .probe = {
@@ -22,7 +20,7 @@ sub vcl_init {
     new roundRobinDirector = directors.round_robin();
 
     {{ range service "app|passing" }}
-    roundRobinDirector.add_backend({{ executeTemplate "service_name_template" }});
+    roundRobinDirector.add_backend(app__{{.Address | replaceAll "." "_"}}__{{.Port}});
     {{ end }}
 }
 
