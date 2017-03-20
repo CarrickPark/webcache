@@ -16,12 +16,16 @@ RUN echo "deb https://repo.varnish-cache.org/debian/ jessie varnish-$VARNISH_VER
 
 # Update the package repository and install applications
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        varnish=4.1.3-1~jessie \
+        varnish=4.1.5-1~jessie \
     && rm -rf /var/lib/apt/lists/*
 
 ADD ./bin/start-varnishd.sh /usr/local/bin/start-varnishd
-ADD ./config/webcache.json /config/webcache.json
-ADD ./config/default.vcl /etc/varnish/default.vcl
+ADD ./bin/reload-varnishd.sh /usr/local/bin/reload-varnishd
+ADD ./config/webcache.json.template /config/webcache.json.template
+ADD ./config/default.vcl.template /etc/varnish/default.vcl.template
+
+ENV CP_TEMPLATE /config/webcache.json.template:/config/webcache.json
+ENV CP_TEMPLATE_2 /etc/varnish/default.vcl.template:/etc/varnish/default.vcl:reload-varnishd
 
 ENV VARNISH_PORT 80
 ENV VARNISH_MEMORY 100m

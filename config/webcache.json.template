@@ -3,8 +3,8 @@
         "name": "webcache",
         "tags": [
             "webcache",
-            "version-1"
-        ], 
+            "version-{{ env "CP_DEPLOY_IDENTIFIER" }}"
+        ],
         "port": 80
     }
 }

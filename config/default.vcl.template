@@ -1,0 +1,31 @@
+vcl 4.0;
+
+import directors;
+
+{{ define "service_name_template" }}my custom template{{ end }}app__{{.Address | replaceAll "." "_"}}__{{.Port}}{{ end }}
+
+{{ range service "app|passing" }}
+backend {{ executeTemplate "service_name_template" }} {
+    .host = "{{.Address}}";
+    .port = "{{.Port}}";
+    .probe = {
+        .url = "/app";
+        .timeout = 500ms;
+        .interval = 5s;
+        .window = 10;
+        .threshold = 8;
+    }
+}
+{{ end }}
+
+sub vcl_init {
+    new roundRobinDirector = directors.round_robin();
+
+    {{ range service "app|passing" }}
+    roundRobinDirector.add_backend({{ executeTemplate "service_name_template" }});
+    {{ end }}
+}
+
+sub vcl_recv {
+    set req.backend_hint = roundRobinDirector.backend();
+}
