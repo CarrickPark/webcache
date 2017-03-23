@@ -24,8 +24,8 @@ ADD ./bin/reload-varnishd.sh /usr/local/bin/reload-varnishd
 ADD ./config/webcache.json.template /config/webcache.json.template
 ADD ./config/default.vcl.template /etc/varnish/default.vcl.template
 
-ENV CP_TEMPLATE /config/webcache.json.template:/config/webcache.json
-ENV CP_TEMPLATE_2 /etc/varnish/default.vcl.template:/etc/varnish/default.vcl:reload-varnishd
+ENV CP_TEMPLATE_AGENT /config/webcache.json.template:/config/webcache.json
+ENV CP_TEMPLATE /etc/varnish/default.vcl.template:/etc/varnish/default.vcl:reload-varnishd
 
 ENV VARNISH_PORT 80
 ENV VARNISH_MEMORY 100m
