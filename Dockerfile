@@ -5,18 +5,27 @@ RUN groupadd -r varnishd && useradd -r -g varnishd varnishd
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		apt-transport-https \
+        debian-archive-keyring \
         ca-certificates \
         curl \
+        gnupg2 \
 	&& rm -rf /var/lib/apt/lists/*
 
-ENV VARNISH_VERSION 4.1
+ENV VARNISH_MAJOR_VERSION 5
 
-RUN curl https://repo.varnish-cache.org/GPG-key.txt | apt-key add -
-RUN echo "deb https://repo.varnish-cache.org/debian/ jessie varnish-$VARNISH_VERSION" >> /etc/apt/sources.list.d/varnish-cache.list
+RUN curl -L -o varnishgpgkey.sh https://packagecloud.io/varnishcache/varnish${VARNISH_MAJOR_VERSION}/gpgkey
+RUN apt-key add varnishgpgkey.sh
+RUN rm varnishgpgkey.sh
+
+ENV VARNISH_PACKAGE_FILE /etc/apt/sources.list.d/varnishcache_varnish${VARNISH_MAJOR_VERSION}.list
+
+RUN touch $VARNISH_PACKAGE_FILE
+RUN echo "deb https://packagecloud.io/varnishcache/varnish5/debian/ stretch main" >> $VARNISH_PACKAGE_FILE
+RUN echo "deb-src https://packagecloud.io/varnishcache/varnish5/debian/ stretch main" >> $VARNISH_PACKAGE_FILE
 
 # Update the package repository and install applications
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        varnish=4.1.5-1~jessie \
+    varnish=5.1.2-1~stretch \
     && rm -rf /var/lib/apt/lists/*
 
 ADD ./bin/start-varnishd.sh /usr/local/bin/start-varnishd
